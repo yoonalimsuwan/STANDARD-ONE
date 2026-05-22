@@ -1,2 +1,234 @@
-# STANDARD-ONE-
-Deterministic Standard Model.
+`
+# STANDARD ONE
+
+**Unified Differentiable Framework for Particle & Cosmos Physics**
+
+STANDARD ONE is a comprehensive, fully differentiable, multi‑paradigm statistical engine for frontier research in fundamental physics. Built entirely on PyTorch, it integrates Bayesian, Frequentist, and Structural Deterministic Probability into a single lightweight infrastructure. It covers the Standard Model particles, all four fundamental forces, parton distribution functions, hard‑process matrix elements, collider event simulation, cosmological observations (CMB, Planck data), black‑hole thermodynamics, dark matter, vacuum energy, and unification models. The entire framework is end‑to‑end differentiable, enabling gradient‑based optimisation of every physical and statistical parameter.
+
+---
+
+## Key Features
+
+- **Complete Standard Model** – quarks, leptons, gauge bosons, Higgs with full quantum numbers (charge, spin, colour, weak isospin, hypercharge).
+- **Differentiable Forces** – 2‑loop running couplings with smooth flavour thresholds, plus electroweak and gravitational parameters.
+- **Parton Distribution Functions** – MIT‑safe parametric form (differentiable) or optional LHAPDF grid interpolation.
+- **Matrix Elements & K‑factors** – QED, QCD, electroweak, Drell‑Yan, gg→Higgs, all with differentiable higher‑order corrections.
+- **Collider & Cosmology Data Loaders** – CERN ROOT files, pyhf HistFactory workspaces, NASA FITS/CSV, Planck CMB spectra.
+- **Differentiable CMB** – Hu & White analytic TT spectrum (fully differentiable) ready for gradient‑based cosmological parameter inference.
+- **Alternative Physics Models** – Black‑hole (Hawking, Page, PBH), dark matter (WIMP, axion, sterile, fuzzy), vacuum energy (Casimir, quintessence, holographic), vacuum extraction (dynamical Casimir, Schwinger), unification (Randall‑Sundrum, running couplings).
+- **Structural Components** – Learnable Coupled Self‑Organised Criticality (CSOC) kernel, Semantic State Contraction (SSC), Differentiable RG refiner, Bias–Variance consistency check.
+- **Full Statistical Toolbox**  
+  *Frequentist*: profile likelihood ratio, asymptotic significance (Z), p‑values, confidence intervals, upper limits.  
+  *Bayesian*: Metropolis‑Hastings, NUTS (via Pyro), Laplace approximation, Bayes factors.  
+  *Structural Probability*: deterministic probability statements with an unresolved interface Γ.
+- **Model Comparison** – AIC, BIC, posterior predictive checks, Bayes factors.
+- **Cross‑Correlation** – simple neural connector between collider and cosmological observables.
+- **Multi‑backend** – runs on CPU, CUDA, Apple MPS, and Ascend NPU with automatic fallback.
+- **Lightweight** – fits within 3 GB RAM, runs on a Colab T4 or Apple Silicon.
+
+---
+
+## Installation
+
+### Prerequisites
+- Python 3.8+
+- PyTorch 2.0+ (with your preferred backend)
+
+### Basic Installation
+```bash
+pip install torch numpy scipy matplotlib
+```
+
+Optional Dependencies
+
+For full functionality install any combination of the following:
+
+```bash
+pip install uproot awkward          # CERN ROOT I/O
+pip install astropy                 # NASA FITS & CSV tables
+pip install pyhf                    # differentiable HistFactory models
+pip install pywt                    # wavelet denoising
+pip install lhapdf-management      # PDF grids (GPL – use parametric PDF to avoid copyleft)
+pip install pyro-ppl                # advanced MCMC (NUTS)
+# cosmo‑power is not required; analytic CMB is built‑in
+```
+
+Clone the repository:
+
+```bash
+git clone https://github.com/your-org/standard-one.git
+cd standard-one
+```
+
+---
+
+Quick Start
+
+Run the built‑in validation tests to verify the physics:
+
+```bash
+python standard_one.py --test
+```
+
+Generate a collider mass spectrum and fit its CSOC parameters:
+
+```bash
+python standard_one.py --physics collider --train-soc
+```
+
+Perform a full Frequentist analysis on the collider model:
+
+```bash
+python standard_one.py --physics collider --frequentist --poi log_mu
+```
+
+Fit the CMB TT power spectrum using gradient descent:
+
+```bash
+python standard_one.py --physics cmb --cmb-fit
+```
+
+---
+
+Command‑Line Arguments
+
+Argument Description Choices / Default
+--physics Physics domain collider, black_hole, dark_matter, cmb
+--model Sub‑model (for BH/DM) hawking, wimp, axion, …
+--data-source Data origin simulate, root, pyhf
+--mass-min, --mass-max Mass range (GeV) default 50.0, 200.0
+--n-events Number of events default 1000
+--device Compute backend cpu, cuda, mps, ascend
+--train-soc Optimise CSOC kernel flag
+--frequentist Profile likelihood analysis flag
+--bayesian MCMC sampling flag
+--use-nuts Use NUTS (requires Pyro) flag
+--poi Parameter of interest e.g., log_mu
+--null Null hypothesis value default 0.0
+--cl Confidence level default 0.68
+--structural Print structural probability statement flag
+--cmb-fit Run CMB parameter fit flag
+--unification-test Energy scale for running couplings float
+--matrix-element Compute a matrix element drell_yan, gg_higgs, …
+--cross-correlate Collider–cosmo cross‑correlation flag
+--test Run validation tests flag
+
+---
+
+Programmatic Usage
+
+```python
+from standard_one import StandardOneUnified
+
+config = {
+    'physics': 'dark_matter',
+    'dm_model': 'wimp',
+    'dm_mass': 100.0,
+    'mass_min': 0.1,
+    'mass_max': 200,
+    'n_events': 500
+}
+
+fw = StandardOneUnified(config, device='cuda')
+fw.load_collider_data(source='simulate')
+
+# Frequentist analysis
+results = fw.run_full_frequentist(poi_name='log_mu', null=0.0, cl=0.68)
+print(results['significance'], results['conf_interval'])
+
+# Bayesian analysis
+bayes_res = fw.run_full_bayesian(use_nuts=True)
+print(bayes_res['map'])
+
+# Compare different DM models
+from standard_one import DarkMatterGenerator, CSOCKernel, SemanticStateContraction, DiffRGRefiner
+
+gen_wimp = DarkMatterGenerator('wimp', dm_mass=100, csoc=CSOCKernel(), ...)
+gen_axion = DarkMatterGenerator('axion', dm_mass=100, csoc=CSOCKernel(), ...)
+comparison = fw.model_comparison([gen_wimp, gen_axion])
+print(comparison)
+```
+
+---
+
+Core Components
+
+Particle Database (ParticleDB)
+
+Full SM particle masses, PDG IDs, and quantum numbers.
+
+Force Parameters (ForceParameters)
+
+Differentiable 2‑loop α_s(μ) with smooth n_f(μ), constant α_EM, G_F, G_N.
+
+PDF Provider (PDFProvider)
+
+Uses either LHAPDF grids or a fully differentiable parametric form with 8 trainable parameters per flavour.
+
+Matrix Elements (MatrixElements)
+
+LO squared amplitudes for key processes, each equipped with a differentiable K‑factor.
+
+Differentiable CMB (DifferentiableCMB)
+
+Implements the Hu & White (1997) analytic TT spectrum, fully embedded in PyTorch for direct gradient‑based fits to Planck data.
+
+Structural Components
+
+· CSOC Kernel: learnable Cs * r^{‑α} * exp(‑r/λ) with 5 trainable parameters.
+· SSC: stabilising state contraction filter.
+· RG Refiner: Fourier‑space low‑pass filter (RG‑inspired).
+· BV Consistency: simple bias–variance diagnostic.
+
+Generators (ColliderGenerator, BlackHoleGenerator, DarkMatterGenerator)
+
+Each combines a physics signal/background model with the CSOC kernel, SSC, and RG refiner. All parameters are differentiable.
+
+Statistical Engines
+
+· FrequentistAnalysis: profile likelihood, q₀, asymptotic significance, confidence intervals, upper limits.
+· BayesianAnalysis: MH, NUTS, Laplace approximation, marginal likelihood, Bayes factors.
+· StructuralProbability: deterministic probability from the generator’s PDF.
+
+---
+
+Philosophy
+
+STANDARD ONE treats probability as an emergent structural property, not a fundamental randomness. The CSOC kernel and associated components implement the idea that all apparent stochasticity arises from the unresolved interface Γ. Once Γ is fully specified, outcomes are deterministic. This perspective unifies frequentist and Bayesian views and offers a novel pathway for interpretable AI in fundamental physics.
+
+---
+
+License
+
+This project is distributed under the MIT License (see LICENSE).
+External libraries retain their own licences. To avoid copyleft restrictions from GPL‑licensed LHAPDF, the built‑in parametric PDF can be used freely.
+
+---
+
+Citation
+
+If you use STANDARD ONE in your research, please cite:
+
+```
+Yoon A Limsuwan. (2026). STANDARD ONE: Unified Differentiable Framework for Particle & Cosmos Physics.
+https://github.com/your-org/standard-one
+```
+
+---
+
+Disclaimer
+
+This software is intended exclusively for peaceful civilian applications.
+
+---
+
+Contact
+
+For questions, collaboration, or commercial licensing, please open an issue or contact the author.
+
+---
+
+Ready for frontier research.
+STANDARD ONE – the differentiable backbone for 21st‑century physics.
+
+```
