@@ -1,4 +1,4 @@
-`
+``
 # STANDARD ONE
 
 **Unified Differentiable Framework for Particle & Cosmos Physics**
@@ -23,6 +23,8 @@ STANDARD ONE is a comprehensive, fully differentiable, multi‑paradigm statisti
   *Structural Probability*: deterministic probability statements with an unresolved interface Γ.
 - **Model Comparison** – AIC, BIC, posterior predictive checks, Bayes factors.
 - **Cross‑Correlation** – simple neural connector between collider and cosmological observables.
+- **O(1) Inference & Differentiable Emulators** – train constant‑time neural surrogates for any component of the pipeline.  
+  The differentiable structure allows high‑fidelity emulators (e.g., for CMB spectra, cross‑sections, PDFs, or full generator outputs) to be trained with exact gradients. Once trained, these emulators evaluate in a fixed number of operations, independent of data size or parameter complexity. The built‑in analytic CMB, learnable CSOC kernel, and RG refiner already provide O(1) building blocks, and the framework is designed to replace expensive routines with lightweight neural surrogates for real‑time inference and large‑scale MCMC.
 - **Multi‑backend** – runs on CPU, CUDA, Apple MPS, and Ascend NPU with automatic fallback.
 - **Lightweight** – fits within 3 GB RAM, runs on a Colab T4 or Apple Silicon.
 
@@ -87,6 +89,31 @@ Fit the CMB TT power spectrum using gradient descent:
 ```bash
 python standard_one.py --physics cmb --cmb-fit
 ```
+
+---
+
+Command‑Line Arguments
+
+Argument Description Choices / Default
+--physics Physics domain collider, black_hole, dark_matter, cmb
+--model Sub‑model (for BH/DM) hawking, wimp, axion, …
+--data-source Data origin simulate, root, pyhf
+--mass-min, --mass-max Mass range (GeV) default 50.0, 200.0
+--n-events Number of events default 1000
+--device Compute backend cpu, cuda, mps, ascend
+--train-soc Optimise CSOC kernel flag
+--frequentist Profile likelihood analysis flag
+--bayesian MCMC sampling flag
+--use-nuts Use NUTS (requires Pyro) flag
+--poi Parameter of interest e.g., log_mu
+--null Null hypothesis value default 0.0
+--cl Confidence level default 0.68
+--structural Print structural probability statement flag
+--cmb-fit Run CMB parameter fit flag
+--unification-test Energy scale for running couplings float
+--matrix-element Compute a matrix element drell_yan, gg_higgs, …
+--cross-correlate Collider–cosmo cross‑correlation flag
+--test Run validation tests flag
 
 ---
 
@@ -164,6 +191,19 @@ Statistical Engines
 · FrequentistAnalysis: profile likelihood, q₀, asymptotic significance, confidence intervals, upper limits.
 · BayesianAnalysis: MH, NUTS, Laplace approximation, marginal likelihood, Bayes factors.
 · StructuralProbability: deterministic probability from the generator’s PDF.
+
+---
+
+O(1) Speed & Emulation
+
+The entire framework is designed to enable constant‑time (O(1)) evaluation for complex physical calculations. Because every component is differentiable, you can train lightweight neural surrogates (emulators) to replace expensive numerical routines while retaining full physics fidelity.
+
+· CSOC & RG as O(1) building blocks – The learnable CSOC kernel and Fourier RG refiner provide analytical forms that mimic power‑law tails and renormalisation group flows, delivering predictions in a fixed number of floating‑point operations.
+· Differentiable CMB – The built‑in Hu & White spectrum already computes Cₗ in O(1) per multipole. The framework can also be used to train a neural CMB emulator (e.g., CosmoPower‑style) using exact gradients, reducing full‑sky likelihood evaluations to milliseconds.
+· End‑to‑end emulation – All generator and likelihood classes expose differentiable forward passes. By wrapping any part of the pipeline (cross‑section calculations, PDF convolutions, detector response) with a small neural network and training it via gradient descent, you obtain an O(1) surrogate that can be deployed in real‑time analysis, embedded systems, or large‑scale MCMC chains.
+· Edge & Colab readiness – Once trained, these emulators require minimal computation, making it feasible to run state‑of‑the‑art physics inference on a laptop, a Colab GPU, or even a mobile device.
+
+This capability makes STANDARD ONE not only a research tool but a production‑ready engine for accelerated discovery.
 
 ---
 
