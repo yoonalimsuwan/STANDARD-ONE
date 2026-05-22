@@ -6,7 +6,6 @@
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20007526-blue)](https://doi.org/10.5281/zenodo.20007526)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19814975-blue)](https://doi.org/10.5281/zenodo.19814975)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20194882-blue)](https://doi.org/10.5281/zenodo.20194882)
-[![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20330482-blue)](https://doi.org/10.5281/zenodo.20330482)
 
 STANDARD ONE is a comprehensive, fully differentiable, multi‑paradigm statistical engine for frontier research in fundamental physics. Built entirely on PyTorch, it integrates Bayesian, Frequentist, and Structural Deterministic Probability into a single lightweight infrastructure. It covers the Standard Model particles, all four fundamental forces, parton distribution functions, hard‑process matrix elements, collider event simulation, cosmological observations (CMB, Planck data), black‑hole thermodynamics, dark matter, vacuum energy, and unification models. The entire framework is end‑to‑end differentiable, enabling gradient‑based optimisation of every physical and statistical parameter.
 
