@@ -223,3 +223,4 @@ Ready for frontier research.
 STANDARD ONE – the differentiable backbone for 21st‑century physics.
 
 ```
+Thank you.
