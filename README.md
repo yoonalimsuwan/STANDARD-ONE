@@ -90,31 +90,6 @@ python standard_one.py --physics cmb --cmb-fit
 
 ---
 
-Command‑Line Arguments
-
-Argument Description Choices / Default
---physics Physics domain collider, black_hole, dark_matter, cmb
---model Sub‑model (for BH/DM) hawking, wimp, axion, …
---data-source Data origin simulate, root, pyhf
---mass-min, --mass-max Mass range (GeV) default 50.0, 200.0
---n-events Number of events default 1000
---device Compute backend cpu, cuda, mps, ascend
---train-soc Optimise CSOC kernel flag
---frequentist Profile likelihood analysis flag
---bayesian MCMC sampling flag
---use-nuts Use NUTS (requires Pyro) flag
---poi Parameter of interest e.g., log_mu
---null Null hypothesis value default 0.0
---cl Confidence level default 0.68
---structural Print structural probability statement flag
---cmb-fit Run CMB parameter fit flag
---unification-test Energy scale for running couplings float
---matrix-element Compute a matrix element drell_yan, gg_higgs, …
---cross-correlate Collider–cosmo cross‑correlation flag
---test Run validation tests flag
-
----
-
 Programmatic Usage
 
 ```python
