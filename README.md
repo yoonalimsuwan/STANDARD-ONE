@@ -189,6 +189,18 @@ Examples & Tutorials
 
 ---
 
+### ⚡ AI‑Accelerated O(1) Speed
+
+STANDARD ONE is designed from the ground up to leverage **neural surrogates** — including the built‑in neural PDF, CMB emulator, detector simulator, and the Yang‑Mills propagator models. Once trained, these differentiable networks replace iterative computations (DGLAP evolution, Boltzmann integrals, detector smearing, pole scanning) with a single feed‑forward pass. The result: **near‑O(1) evaluation time** per physics prediction, independent of the underlying complexity.
+
+This unlocks:
+- **Real‑time inference** for collider trigger decisions or cosmological parameter updates.
+- **Massive parameter scans** (billions of points) that were previously intractable.
+- **Active learning and Bayesian optimization** with negligible latency per proposal.
+- **Edge deployment** — run on lightweight hardware while preserving full physics fidelity.
+
+Simply train a surrogate once, then call it as a drop‑in replacement for the exact model — the framework automatically routes to the fastest differentiable path.
+
 Documentation & Citation
 
 Full API documentation and detailed physics notes are available in the docs/ directory.
