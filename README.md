@@ -6,8 +6,9 @@ Unified Differentiable Framework for Particle & Cosmos Physics
 
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20007526-blue)](https://doi.org/10.5281/zenodo.20007526)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19814975-blue)](https://doi.org/10.5281/zenodo.19814975)
+[![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19869633-blue)](https://doi.org/10.5281/zenodo.19869633)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20194882-blue)](https://doi.org/10.5281/zenodo.20194882)
-[![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20343293-blue)](https://doi.org/10.5281/zenodo.20343293)
+[![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20364171-blue)](https://doi.org/10.5281/zenodo.20364171)
 
 Democratizing frontier physics through differentiable programming, from quarks to the cosmos.
 
@@ -60,7 +61,7 @@ Key Features
 · Model comparison with AIC, BIC, and Bayes factors.
 · End‑to‑end automatic differentiation — all physical and statistical parameters are trainable via PyTorch.
 
-🧬 YANG MILLS MASS GAP (ONE) — New!
+🧬 YANG MILLS MASS GAP (ONE) 
 
 A dedicated differentiable extension for the Yang–Mills mass gap problem:
 
@@ -198,7 +199,7 @@ If you use STANDARD ONE or YANG MILLS MASS GAP (ONE) in your research, please ci
   author       = {Yoon A Limsuwan},
   title        = {STANDARD ONE: Unified Differentiable Framework for Particle \& Cosmos Physics},
   year         = 2026,
-  doi          = {10.5281/zenodo.20007526},
+  doi          = {DOI: 10.5281/zenodo.20364171},
   url          = {https://github.com/your-org/standard-one}
 }
 
@@ -206,7 +207,7 @@ If you use STANDARD ONE or YANG MILLS MASS GAP (ONE) in your research, please ci
   author       = {Yoon A Limsuwan},
   title        = {YANG MILLS MASS GAP (ONE): Differentiable Explorer for the Yang-Mills Mass Gap},
   year         = 2026,
-  doi          = {10.5281/zenodo.xxxxxxx},
+  doi          = {DOI: 10.5281/zenodo.20364171},
   note         = {Extension to STANDARD ONE}
 }
 ```
