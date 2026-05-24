@@ -1,231 +1,229 @@
-``
-# STANDARD ONE
+STANDARD ONE
 
-**Unified Differentiable Framework for Particle & Cosmos Physics**
+Unified Differentiable Framework for Particle & Cosmos Physics
 
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20007526-blue)](https://doi.org/10.5281/zenodo.20007526)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19814975-blue)](https://doi.org/10.5281/zenodo.19814975)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20194882-blue)](https://doi.org/10.5281/zenodo.20194882)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20343293-blue)](https://doi.org/10.5281/zenodo.20343293)
 
-STANDARD ONE is a comprehensive, fully differentiable, multi‑paradigm statistical engine for frontier research in fundamental physics. Built entirely on PyTorch, it integrates Bayesian, Frequentist, and Structural Deterministic Probability into a single lightweight infrastructure. It covers the Standard Model particles, all four fundamental forces, parton distribution functions, hard‑process matrix elements, collider event simulation, cosmological observations (CMB, Planck data), black‑hole thermodynamics, dark matter, vacuum energy, and unification models. The entire framework is end‑to‑end differentiable, enabling gradient‑based optimisation of every physical and statistical parameter.
+Democratizing frontier physics through differentiable programming, from quarks to the cosmos.
+
+STANDARD ONE is a comprehensive, fully differentiable, multi‑paradigm statistical engine for fundamental physics research. Built entirely on PyTorch, it unifies Bayesian, Frequentist, and Structural Deterministic Probability within a single lightweight infrastructure. The framework covers the Standard Model particles and all four fundamental forces, parton distribution functions (PDFs) with DGLAP evolution, hard‑process matrix elements, collider event simulation, full cosmological observations (CMB, Planck data), black‑hole thermodynamics, dark matter, vacuum energy, unification models, and now — via its companion module YANG MILLS MASS GAP (ONE) — the Yang–Mills mass gap problem. Every component is end‑to‑end differentiable, enabling gradient‑based optimisation, Bayesian inference, and model comparison across particle physics and cosmology.
 
 ---
 
-## Key Features
+Key Features
 
-- **Complete Standard Model** – quarks, leptons, gauge bosons, Higgs with full quantum numbers (charge, spin, colour, weak isospin, hypercharge).
-- **Differentiable Forces** – 2‑loop running couplings with smooth flavour thresholds, plus electroweak and gravitational parameters.
-- **Parton Distribution Functions** – MIT‑safe parametric form (differentiable) or optional LHAPDF grid interpolation.
-- **Matrix Elements & K‑factors** – QED, QCD, electroweak, Drell‑Yan, gg→Higgs, all with differentiable higher‑order corrections.
-- **Collider & Cosmology Data Loaders** – CERN ROOT files, pyhf HistFactory workspaces, NASA FITS/CSV, Planck CMB spectra.
-- **Differentiable CMB** – Hu & White analytic TT spectrum (fully differentiable) ready for gradient‑based cosmological parameter inference.
-- **Alternative Physics Models** – Black‑hole (Hawking, Page, PBH), dark matter (WIMP, axion, sterile, fuzzy), vacuum energy (Casimir, quintessence, holographic), vacuum extraction (dynamical Casimir, Schwinger), unification (Randall‑Sundrum, running couplings).
-- **Structural Components** – Learnable Coupled Self‑Organised Criticality (CSOC) kernel, Semantic State Contraction (SSC), Differentiable RG refiner, Bias–Variance consistency check.
-- **Full Statistical Toolbox**  
-  *Frequentist*: profile likelihood ratio, asymptotic significance (Z), p‑values, confidence intervals, upper limits.  
-  *Bayesian*: Metropolis‑Hastings, NUTS (via Pyro), Laplace approximation, Bayes factors.  
-  *Structural Probability*: deterministic probability statements with an unresolved interface Γ.
-- **Model Comparison** – AIC, BIC, posterior predictive checks, Bayes factors.
-- **Cross‑Correlation** – simple neural connector between collider and cosmological observables.
-- **O(1) Inference & Differentiable Emulators** – train constant‑time neural surrogates for any component of the pipeline.  
-  The differentiable structure allows high‑fidelity emulators (e.g., for CMB spectra, cross‑sections, PDFs, or full generator outputs) to be trained with exact gradients. Once trained, these emulators evaluate in a fixed number of operations, independent of data size or parameter complexity. The built‑in analytic CMB, learnable CSOC kernel, and RG refiner already provide O(1) building blocks, and the framework is designed to replace expensive routines with lightweight neural surrogates for real‑time inference and large‑scale MCMC.
-- **Multi‑backend** – runs on CPU, CUDA, Apple MPS, and Ascend NPU with automatic fallback.
-- **Lightweight** – fits within 3 GB RAM, runs on a Colab T4 or Apple Silicon.
+🔬 Particle & Nuclear Physics
+
+· Complete Standard Model particle database (masses, charges, spins, colour, weak isospin, hypercharge).
+· Differentiable electroweak parameters (α, α_s, G_F, M_Z, sin²θ_W) and running couplings.
+· Parton Distribution Functions with multiple backends:
+  · Differentiable DGLAP evolution in Mellin space (LO/NLO, exact singlet/non‑singlet anomalous dimensions).
+  · Neural PDF surrogate trained on LHAPDF grids for fast, differentiable evaluation.
+  · Direct LHAPDF interface for non‑differentiable checks.
+· Matrix Elements for QED, QCD, and electroweak processes with NNLO K‑factors (Drell‑Yan, gluon‑fusion Higgs).
+· Collider event generation:
+  · Structural generators (crystal‑ball, exponential, etc.) and physical cross‑section generators.
+  · Integration with Pythia8 and Herwig for full parton shower and hadronization (optional, GPL).
+  · Differentiable detector simulation (fast, trainable resolution and efficiency model).
+  · Support for CERN Open Data (ROOT via uproot/awkward) and pyhf workspace likelihoods.
+
+🌌 Cosmology & Astrophysics
+
+· Cosmology engine with trainable parameters (H₀, Ω_b, Ω_c, Ω_Λ, w, T_cmb, N_eff).
+· Differentiable CMB power spectra via:
+  · CosmoPower neural emulator (fast, differentiable).
+  · CAMB and CLASS Boltzmann solvers (optional, GPL).
+  · Built‑in neural emulator (trainable on CAMB outputs).
+  · Analytic Hu–White approximation.
+  · Automatic backend selection (auto chooses best available).
+· Planck 2018 data loader (high‑ℓ TT spectrum, covariance) with full Gaussian likelihood.
+· Cross‑correlation between collider and CMB observables.
+
+🕳️ Gravity & Quantum Fields
+
+· Black‑hole thermodynamics (Hawking, Page, primordial BH models) with differentiable spectra.
+· Dark matter models (WIMP, axion, sterile, fuzzy) as differentiable generators.
+· Vacuum energy & extraction models (zero‑point, Casimir, quintessence, holographic).
+· Unification models (running SU(3), SU(2), U(1) couplings, Randall–Sundrum warp factor).
+
+🧮 Statistical & Mathematical Methods
+
+· Three statistical paradigms in one framework:
+  · Frequentist: profile likelihood, significance, CLs, confidence intervals, bootstrap calibration.
+  · Bayesian: Laplace approximation, adaptive MCMC, NUTS (via Pyro), marginal likelihood, Bayes factors.
+  · Structural Deterministic Probability: CSOC kernel, semantic state contraction (SSC), renormalization group (RG), BV consistency.
+· Model comparison with AIC, BIC, and Bayes factors.
+· End‑to‑end automatic differentiation — all physical and statistical parameters are trainable via PyTorch.
+
+🧬 YANG MILLS MASS GAP (ONE) — New!
+
+A dedicated differentiable extension for the Yang–Mills mass gap problem:
+
+· Parametric gluon propagator models (Gribov, massive, refined Gribov, decoupling/scaling).
+· Differentiable complex‑pole analysis for mass gap extraction.
+· Fitting to lattice QCD data (or synthetic) using gradient descent.
+· Seamless integration with STANDARD ONE’s running coupling and CSOC regularisation.
+· Does not require modification of STANDARD ONE — instant plug‑in.
+
+🖥️ Hardware & Portability
+
+· Multi‑backend: CPU, CUDA, Apple MPS, Ascend NPU.
+· Lightweight: runs on 3 GB RAM, Google Colab T4, Apple Silicon, Chinese chips.
+· Pure Python; no compilation required.
 
 ---
 
-## Installation
+Installation
 
-### Prerequisites
-- Python 3.8+
-- PyTorch 2.0+ (with your preferred backend)
+STANDARD ONE requires Python ≥ 3.8 and PyTorch ≥ 1.12. Install the core dependencies:
 
-### Basic Installation
 ```bash
 pip install torch numpy scipy matplotlib
+# Optional but recommended
+pip install uproot awkward astropy pyhf pywt pyro-ppl cosmopower
+# For advanced features (GPL‑licensed, optional)
+pip install lhapdf camb classy pythia8 herwig  # may need manual builds
 ```
 
-Optional Dependencies
-
-For full functionality install any combination of the following:
+Then clone or download the repository:
 
 ```bash
-pip install uproot awkward          # CERN ROOT I/O
-pip install astropy                 # NASA FITS & CSV tables
-pip install pyhf                    # differentiable HistFactory models
-pip install pywt                    # wavelet denoising
-pip install lhapdf-management      # PDF grids (GPL – use parametric PDF to avoid copyleft)
-pip install pyro-ppl                # advanced MCMC (NUTS)
-# cosmo‑power is not required; analytic CMB is built‑in
-```
-
-Clone the repository:
-
-```bash
-git clone https://github.com/yoonalimsuwan/STANDARD-ONE.git
+git clone https://github.com/your-org/standard-one.git
 cd standard-one
 ```
+
+For the Yang–Mills extension, simply copy yang_mills_mass_gap_one.py into the same directory.
 
 ---
 
 Quick Start
 
-Run the built‑in validation tests to verify the physics:
-
-```bash
-python standard_one.py --test
-```
-
-Generate a collider mass spectrum and fit its CSOC parameters:
-
-```bash
-python standard_one.py --physics collider --train-soc
-```
-
-Perform a full Frequentist analysis on the collider model:
-
-```bash
-python standard_one.py --physics collider --frequentist --poi log_mu
-```
-
-Fit the CMB TT power spectrum using gradient descent:
-
-```bash
-python standard_one.py --physics cmb --cmb-fit
-```
-
----
-
-Programmatic Usage
-
 ```python
 from standard_one import StandardOneUnified
 
 config = {
-    'physics': 'dark_matter',
-    'dm_model': 'wimp',
-    'dm_mass': 100.0,
-    'mass_min': 0.1,
-    'mass_max': 200,
-    'n_events': 500
+    'physics': 'collider',
+    'mass_min': 50, 'mass_max': 200,
+    'n_events': 2000,
+    'use_physical_cross_section': True,
+    'process': 'drell_yan', 'sqrts': 13000
 }
 
-fw = StandardOneUnified(config, device='cuda')
-fw.load_collider_data(source='simulate')
+# Initialize framework
+framework = StandardOneUnified(config, device='cpu')
 
-# Frequentist analysis
-results = fw.run_full_frequentist(poi_name='log_mu', null=0.0, cl=0.68)
-print(results['significance'], results['conf_interval'])
+# Load simulated collider data and run a frequentist fit
+framework.load_collider_data(source='simulate', n_samples=1500)
+framework.train_soc_gradient(n_steps=100)
+result = framework.run_full_frequentist(poi_name='signal_mass')
+print(result)
 
 # Bayesian analysis
-bayes_res = fw.run_full_bayesian(use_nuts=True)
-print(bayes_res['map'])
+bayes_result = framework.run_full_bayesian(n_samples=1000)
+print(bayes_result['map'])
 
-# Compare different DM models
-from standard_one import DarkMatterGenerator, CSOCKernel, SemanticStateContraction, DiffRGRefiner
+# Validate against real ATLAS Z→μμ data
+framework.validate_against_atlas_zmumu(sqrts=13000)
 
-gen_wimp = DarkMatterGenerator('wimp', dm_mass=100, csoc=CSOCKernel(), ...)
-gen_axion = DarkMatterGenerator('axion', dm_mass=100, csoc=CSOCKernel(), ...)
-comparison = fw.model_comparison([gen_wimp, gen_axion])
-print(comparison)
+# CMB fit
+cmb_fit = framework.run_cmb_fit(cmb_backend='auto')
+print(cmb_fit)
 ```
 
 ---
 
-Core Components
+Yang–Mills Mass Gap (Plug‑in Example)
 
-Particle Database (ParticleDB)
+No modifications to STANDARD ONE needed. Just create a YangMillsMassGap object using the framework’s physics parameters and CSOC kernel:
 
-Full SM particle masses, PDG IDs, and quantum numbers.
+```python
+from yang_mills_mass_gap_one import YangMillsMassGap
 
-Force Parameters (ForceParameters)
+# Use existing physics & CSOC from your STANDARD ONE instance
+ym = YangMillsMassGap(
+    physics_params=framework.physics,
+    csoc=framework.csoc,
+    propagator_type='refined',   # choose 'gribov', 'massive', or 'refined'
+    device='cpu'
+)
 
-Differentiable 2‑loop α_s(μ) with smooth n_f(μ), constant α_EM, G_F, G_N.
+# Fit to lattice gluon propagator data (CSV or synthetic)
+ym.fit_to_lattice("gluon_propagator.csv", epochs=500, lr=0.01)
 
-PDF Provider (PDFProvider)
+# Extract mass gap in GeV
+mass_gap = ym.extract_mass_gap(method='pole_scan')
+print(f"Yang–Mills mass gap = {mass_gap*1000:.1f} MeV")
 
-Uses either LHAPDF grids or a fully differentiable parametric form with 8 trainable parameters per flavour.
-
-Matrix Elements (MatrixElements)
-
-LO squared amplitudes for key processes, each equipped with a differentiable K‑factor.
-
-Differentiable CMB (DifferentiableCMB)
-
-Implements the Hu & White (1997) analytic TT spectrum, fully embedded in PyTorch for direct gradient‑based fits to Planck data.
-
-Structural Components
-
-· CSOC Kernel: learnable Cs * r^{‑α} * exp(‑r/λ) with 5 trainable parameters.
-· SSC: stabilising state contraction filter.
-· RG Refiner: Fourier‑space low‑pass filter (RG‑inspired).
-· BV Consistency: simple bias–variance diagnostic.
-
-Generators (ColliderGenerator, BlackHoleGenerator, DarkMatterGenerator)
-
-Each combines a physics signal/background model with the CSOC kernel, SSC, and RG refiner. All parameters are differentiable.
-
-Statistical Engines
-
-· FrequentistAnalysis: profile likelihood, q₀, asymptotic significance, confidence intervals, upper limits.
-· BayesianAnalysis: MH, NUTS, Laplace approximation, marginal likelihood, Bayes factors.
-· StructuralProbability: deterministic probability from the generator’s PDF.
+# Bayesian inference on mass gap
+import torch
+def log_prob_fn():
+    return -ym.likelihood(p2_data, D_data)
+from standard_one import BayesianAnalysis
+params = list(ym.propagator.parameters())
+bayes = BayesianAnalysis(log_prob_fn, params, ['log_M4','log_m2'], device='cpu')
+map_est = bayes.laplace_approximation()
+```
 
 ---
 
-O(1) Speed & Emulation
+Examples & Tutorials
 
-The entire framework is designed to enable constant‑time (O(1)) evaluation for complex physical calculations. Because every component is differentiable, you can train lightweight neural surrogates (emulators) to replace expensive numerical routines while retaining full physics fidelity.
-
-· CSOC & RG as O(1) building blocks – The learnable CSOC kernel and Fourier RG refiner provide analytical forms that mimic power‑law tails and renormalisation group flows, delivering predictions in a fixed number of floating‑point operations.
-· Differentiable CMB – The built‑in Hu & White spectrum already computes Cₗ in O(1) per multipole. The framework can also be used to train a neural CMB emulator (e.g., CosmoPower‑style) using exact gradients, reducing full‑sky likelihood evaluations to milliseconds.
-· End‑to‑end emulation – All generator and likelihood classes expose differentiable forward passes. By wrapping any part of the pipeline (cross‑section calculations, PDF convolutions, detector response) with a small neural network and training it via gradient descent, you obtain an O(1) surrogate that can be deployed in real‑time analysis, embedded systems, or large‑scale MCMC chains.
-· Edge & Colab readiness – Once trained, these emulators require minimal computation, making it feasible to run state‑of‑the‑art physics inference on a laptop, a Colab GPU, or even a mobile device.
-
-This capability makes STANDARD ONE not only a research tool but a production‑ready engine for accelerated discovery.
+· Higgs mass fit demo
+    python standard_one.py --higgs-demo
+    Fits the Z boson mass peak using a crystal‑ball signal + exponential background, comparing frequentist and Bayesian results.
+· Full chain simulation with Pythia8 and detector
+    python standard_one.py --physics collider --use-physical-xsec --data-source full_simulation --shower pythia8 --frequentist
+· CMB power spectrum fitting
+    python standard_one.py --cmb-fit --cmb-backend cosmopower
+· Yang–Mills mass gap standalone
+    python yang_mills_mass_gap_one.py
+    (requires STANDARD ONE in the path) – demonstrates a propagator fit and mass gap extraction.
+· Run all validation tests
+    python standard_one.py --test
 
 ---
 
-Philosophy
+Documentation & Citation
 
-STANDARD ONE treats probability as an emergent structural property, not a fundamental randomness. The CSOC kernel and associated components implement the idea that all apparent stochasticity arises from the unresolved interface Γ. Once Γ is fully specified, outcomes are deterministic. This perspective unifies frequentist and Bayesian views and offers a novel pathway for interpretable AI in fundamental physics.
+Full API documentation and detailed physics notes are available in the docs/ directory.
+If you use STANDARD ONE or YANG MILLS MASS GAP (ONE) in your research, please cite:
+
+```
+@software{standardone2026,
+  author       = {Yoon A Limsuwan},
+  title        = {STANDARD ONE: Unified Differentiable Framework for Particle \& Cosmos Physics},
+  year         = 2026,
+  doi          = {10.5281/zenodo.20007526},
+  url          = {https://github.com/your-org/standard-one}
+}
+
+@software{yangmillsmassgap2026,
+  author       = {Yoon A Limsuwan},
+  title        = {YANG MILLS MASS GAP (ONE): Differentiable Explorer for the Yang-Mills Mass Gap},
+  year         = 2026,
+  doi          = {10.5281/zenodo.xxxxxxx},
+  note         = {Extension to STANDARD ONE}
+}
+```
 
 ---
 
 License
 
-This project is distributed under the MIT License (see LICENSE).
-External libraries retain their own licences. To avoid copyleft restrictions from GPL‑licensed LHAPDF, the built‑in parametric PDF can be used freely.
+STANDARD ONE is released under the MIT License.
+YANG MILLS MASS GAP (ONE) is also MIT‑licensed.
+External optional libraries (LHAPDF, CAMB, CLASS, Pythia8, Herwig) retain their own licenses; if linked, the combined work must comply with those terms. To remain pure MIT, rely on the built‑in neural PDF, neural CMB emulator, and structural collider generator.
 
 ---
 
-Citation
+Contributing & Community
 
-If you use STANDARD ONE in your research, please cite:
-
-```
-Yoon A Limsuwan. (2026). STANDARD ONE: Unified Differentiable Framework for Particle & Cosmos Physics.
-https://github.com/yoonalimsuwan/STANDARD-ONE
-
-```
-
----
-
-Disclaimer
-
+We welcome contributions from the worldwide physics and AI communities. Please see CONTRIBUTING.md for guidelines.
 This software is intended exclusively for peaceful civilian applications.
 
 ---
 
-Contact
-
-For questions, collaboration, or commercial licensing, please open an issue or contact the author.
-
----
-
-Ready for frontier research.
-STANDARD ONE – the differentiable backbone for 21st‑century physics.
-
-```
-Thank you.
+STANDARD ONE is more than a toolbox — it is a new paradigm for differentiable, multi‑paradigm physics. Together with YANG MILLS MASS GAP (ONE), it opens a path to solving the deepest problems of nature using the full power of modern machine learning and statistical inference.
