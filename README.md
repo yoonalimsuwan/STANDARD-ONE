@@ -96,7 +96,7 @@ pip install lhapdf camb classy pythia8 herwig  # may need manual builds
 Then clone or download the repository:
 
 ```bash
-git clone https://github.com/your-org/standard-one.git
+git clone https://github.com/yoonalimsuwan/STANDARD-ONE.git
 cd standard-one
 ```
 
@@ -214,7 +214,7 @@ If you use STANDARD ONE or YANG MILLS MASS GAP (ONE) in your research, please ci
   title        = {STANDARD ONE: Unified Differentiable Framework for Particle \& Cosmos Physics},
   year         = 2026,
   doi          = {DOI: 10.5281/zenodo.20364171},
-  url          = {https://github.com/your-org/standard-one}
+  url          = https://github.com/yoonalimsuwan/STANDARD-ONE/blob/main/README.md
 }
 
 @software{yangmillsmassgap2026,
