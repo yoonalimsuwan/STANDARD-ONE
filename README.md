@@ -10,6 +10,7 @@ Unified Differentiable Framework for Particle & Cosmos Physics
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20194882-blue)](https://doi.org/10.5281/zenodo.20194882)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20718920-blue)](https://doi.org/10.5281/zenodo.20718920)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20482078-blue)](https://doi.org/10.5281/zenodo.20482078)
+[![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20730429-blue)](https://doi.org/10.5281/zenodo.20730429)
 
 
 Democratizing frontier physics through differentiable programming, from quarks to the cosmos.
