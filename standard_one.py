@@ -1696,7 +1696,22 @@ class CSOCKernel(nn.Module):
     def tau(self): return torch.exp(self.log_tau)
 
     def forward(self, r):
-        return self.Cs * torch.pow(r + 1e-6, -self.alpha) * torch.exp(-r / self.lambd)
+        # NUMERICAL STABILITY FIX (2026-06-23, Claude + Yoon A Limsuwan):
+        # Original used `torch.pow(r + 1e-6, -self.alpha)`. As r -> 0 (the IR
+        # region that dominates mass-gap physics) this term diverges, and the
+        # divergence gets *worse* as `alpha` grows during unconstrained Adam
+        # optimization (alpha is unbounded via log_alpha). Same failure class
+        # as the CSOCKernel power-law instability fixed in SUPER DNS ONE.
+        #
+        # Fix: floor r at a small fraction of the kernel's own correlation
+        # length `lambd` rather than an absolute constant. This keeps the
+        # floor physically meaningful across rescalings of lambd (instead of
+        # a fixed 1e-6 that may be irrelevant or too aggressive depending on
+        # the scale of r), and bounds r^(-alpha) to (r_floor)^(-alpha) in the
+        # worst case -- finite for any alpha reached during training.
+        r_floor = 1e-3 * self.lambd
+        r_safe = torch.clamp(r, min=r_floor)
+        return self.Cs * torch.pow(r_safe, -self.alpha) * torch.exp(-r / self.lambd)
 
 class SemanticStateContraction:
     def __init__(self, epsilon_fp=0.0028, sigma_target=1.0):
