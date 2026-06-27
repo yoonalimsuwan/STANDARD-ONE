@@ -8,7 +8,7 @@ Unified Differentiable Framework for Particle & Cosmos Physics
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19814975-blue)](https://doi.org/10.5281/zenodo.19814975)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19869633-blue)](https://doi.org/10.5281/zenodo.19869633)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20194882-blue)](https://doi.org/10.5281/zenodo.20194882)
-[![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20910115-blue)](https://doi.org/10.5281/zenodo.20910115)
+[![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20954514-blue)](https://doi.org/10.5281/zenodo.20954514)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20482078-blue)](https://doi.org/10.5281/zenodo.20482078)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20730429-blue)](https://doi.org/10.5281/zenodo.20730429)
 
@@ -214,7 +214,7 @@ If you use STANDARD ONE or YANG MILLS MASS GAP (ONE) in your research, please ci
   author       = {Yoon A Limsuwan},
   title        = {STANDARD ONE: Unified Differentiable Framework for Particle \& Cosmos Physics},
   year         = 2026,
-  doi          = {https://doi.org/10.5281/zenodo.20910115},
+  doi          = {https://doi.org/10.5281/zenodo.20954514},
   url          = https://github.com/yoonalimsuwan/STANDARD-ONE
 }
 
@@ -222,7 +222,7 @@ If you use STANDARD ONE or YANG MILLS MASS GAP (ONE) in your research, please ci
   author       = {Yoon A Limsuwan},
   title        = {YANG MILLS MASS GAP (ONE): Differentiable Explorer for the Yang-Mills Mass Gap},
   year         = 2026,
-  doi          = https://doi.org/10.5281/zenodo.20910115  ,
+  doi          =  https://doi.org/10.5281/zenodo.20954514 ,
   note         = {Extension to STANDARD ONE}
 }
 ```
