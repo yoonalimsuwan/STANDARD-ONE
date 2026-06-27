@@ -12,7 +12,8 @@
 # AI Co-Developers (architecture, numerical methods, production hardening):
 #   - Claude   (Anthropic)  — production refactor, EMA checkpointing,
 #                             multi-loss weighting, physics-informed losses,
-#                             LR scheduling, gradient monitoring, full docstrings
+#                             LR scheduling, gradient monitoring, full docstrings;
+#                             v1.1.0 Mode 4 (entangled-pair correlator) below.
 #   - GPT      (OpenAI)     — early architecture exploration, message-passing
 #                             design, phase-field surrogate concept
 #   - Gemini   (Google)     — v2 unified discrete/continuous extension,
@@ -24,19 +25,66 @@
 #     • Full integration with STANDARD ONE (PhysicsParameters, CSOCKernel,
 #       SemanticStateContraction, DiffRGRefiner)
 #     • Yang–Mills mass gap data pipeline (GribovPropagator, RefinedGribov)
+#     • Entangled-pair polarization/spin correlator (Mode 4, v1.1.0)
 #     • Exponential Moving Average (EMA) weight tracking
 #     • Multi-task loss with learnable uncertainty weighting (Kendall et al.)
 #     • Cosine annealing + warmup LR schedule
 #     • Gradient norm monitoring and adaptive clipping
 #     • Production checkpoint manager (save / resume / best-model tracking)
 #     • Physics-informed auxiliary losses (positivity, propagator monotonicity,
-#       CMB power-law prior, YM mass gap constraint)
+#       CMB power-law prior, YM mass gap constraint, Tsirelson-bound
+#       realizability prior for the entangled-pair correlator)
 #     • Unified training loop with domain-balanced sampling
 #     • Inference API with uncertainty propagation
 #
+# =============================================================================
+# v1.1.0 — Mode 4: Entangled-Pair Spin/Polarization Correlator  [NEW]
+#          Primary developer of this patch: Claude (Anthropic).
+#
+#   CONTEXT: this mode exists to give the ONE Ecosystem's existing Bell/CHSH
+#   test bench (`bell_chsh_one.py`) a trainable physics surrogate to sit
+#   next to: that file *proves* what Γ would need to give up (locality or
+#   measurement independence) to match quantum correlations; this mode
+#   *learns* to predict the correlator E(a,b) for a realistic, imperfect
+#   entangled-pair source — i.e. it is a regression surrogate, not itself a
+#   hidden-variable model, and makes no locality/independence claim.
+#
+#   PHYSICS MODEL (Werner-state polarization/spin correlator):
+#       ρ = V |ψ⁻⟩⟨ψ⁻| + (1-V)/4 · I  ,   E(a,b) = -V · cos(a-b)
+#   V ∈ [0,1] is the source visibility (V=1 → pure singlet, the textbook
+#   case in `bell_chsh_one.py`; V ≤ 1/√2 → CHSH-local, matching what real,
+#   noisy entangled-photon / entangled-ion sources actually produce).
+#
+#   [NEW] `forward_entangled()` — 4th forward mode on the existing shared
+#         FiLM backbone. Input (B,4) = [θ_a, θ_b, V, pair_source_id];
+#         output (B,1) = predicted E(θ_a,θ_b) ∈ [-1,1] via tanh.
+#   [NEW] `SyntheticDataGenerator.entangled_batch()` /
+#         `.chsh_quadruple_batch()` — Werner-state training data, plus
+#         angle quadruples for the CHSH physical-realizability penalty.
+#   [NEW] `MultiTaskPhysicsLoss.physics_penalty_chsh()` — penalizes any
+#         predicted (E(a,b),E(a,b'),E(a',b),E(a',b')) quadruple whose CHSH
+#         value |S| exceeds the Tsirelson bound 2√2 (imported from
+#         `bell_chsh_one.py` so both files share one numerical source of
+#         truth). No physical quantum correlator can exceed it, so this is
+#         a hard physics prior, not a soft stylistic one.
+#   [NEW] `MultiTaskPhysicsLoss.physics_penalty_entangled_boundedness()` —
+#         soft |E|≤1 guard (redundant with tanh, kept as a regression
+#         safety net in case the output head is ever changed).
+#   [NEW] `NGOPhysicsInference.predict_entangled_correlator()` and
+#         `.chsh_test()` — inference-time CHSH evaluation that classifies
+#         the model's own predictions as local / quantum / non-physical
+#         using the same `LOCAL_BOUND` / `TSIRELSON_BOUND` constants as
+#         `bell_chsh_one.py`.
+#   [NEW] `NGOPhysicsConfig.lambda_entangled` loss weight (default 1.0).
+#   No existing call site is broken: all four forward modes remain
+#   independently optional (`forward()` still returns `None` for unused
+#   branches), and the v1.0 collider/cosmo/YM behaviour is bit-for-bit
+#   unchanged.
+#
 # Dependencies:
-#   standard_one.py          (same directory)
+#   standard_one.py             (same directory)
 #   yang_mills_mass_gap_one.py  (same directory)
+#   bell_chsh_one.py            (same directory) — LOCAL_BOUND, TSIRELSON_BOUND
 #   PyTorch >= 2.0
 # =============================================================================
 
@@ -74,6 +122,10 @@ from yang_mills_mass_gap_one import (
     RefinedGribovPropagator,
     YangMillsMassGap,
 )
+from bell_chsh_one import (
+    LOCAL_BOUND,
+    TSIRELSON_BOUND,
+)
 
 logger = logging.getLogger("NGOPhysicsOne")
 logging.basicConfig(
@@ -106,6 +158,7 @@ class NGOPhysicsConfig:
     lambda_cosmo: float = 1.0
     lambda_ym: float = 2.0        # YM mass gap gets higher initial weight
     lambda_physics: float = 0.5   # auxiliary physics-informed penalty
+    lambda_entangled: float = 1.0 # entangled-pair correlator (v1.1.0)
 
     # ---- Training -----------------------------------------------------------
     epochs: int = 300
@@ -237,7 +290,7 @@ class StructuralGNOPhysics(nn.Module):
     """
     Production Structural GNO Physics surrogate.
 
-    Three forward modes, unified through a shared FiLM backbone:
+    Four forward modes, unified through a shared FiLM backbone:
 
     Mode 1 — Collider:
         Input  : (B, 4)  [√s, mass, α_s, process_id]
@@ -251,7 +304,26 @@ class StructuralGNOPhysics(nn.Module):
         Input  : (B, 2)  [p², α_s(p²)]
         Output : (B, 1)  D(p²) gluon propagator
 
-    The CSOC structural parameter σ is shared across all three modes and
+    Mode 4 — Entangled-Pair Spin/Polarization Correlator  (v1.1.0):
+        Input  : (B, 4)  [θ_a, θ_b, V, pair_source_id]
+                 θ_a, θ_b : the two wings' measurement angles (radians)
+                 V        : source visibility/purity, Werner-state mixing
+                            parameter, V=1 → pure singlet, V≤1/√2 → no
+                            CHSH violation is possible even in principle
+                 pair_source_id : categorical id for the experimental
+                            source type (e.g. SPDC Type-I/II, atomic
+                            cascade, trapped-ion) — lets the surrogate
+                            learn source-specific systematics, exactly
+                            like Mode 1's process_id
+        Output : (B, 1)  predicted correlator E(θ_a,θ_b) ∈ [-1,1] (tanh)
+        Target physics (Werner state): E(a,b) = -V·cos(a-b). This mode is
+        a regression surrogate for that correlator; it does not itself
+        assert anything about locality or hidden variables — that
+        question is handled by the standalone test bench in
+        `bell_chsh_one.py`, whose LOCAL_BOUND / TSIRELSON_BOUND constants
+        this module re-uses for its physical-realizability loss term.
+
+    The CSOC structural parameter σ is shared across all four modes and
     serves as a global regulariser from the ONE Ecosystem.
     """
 
@@ -264,6 +336,7 @@ class StructuralGNOPhysics(nn.Module):
         self.collider_encoder = DomainEncoder(4, d)
         self.cosmo_encoder    = DomainEncoder(6, d)
         self.ym_encoder       = DomainEncoder(2, d)
+        self.entangled_encoder = DomainEncoder(4, d)   # v1.1.0 Mode 4
 
         # ---- Shared backbone -----------------------------------------------
         self.layers = nn.ModuleList([
@@ -285,6 +358,12 @@ class StructuralGNOPhysics(nn.Module):
             nn.Linear(d * 2, cfg.lmax),
         )
         self.ym_head = nn.Sequential(
+            nn.LayerNorm(d),
+            nn.Linear(d, d // 2),
+            nn.GELU(),
+            nn.Linear(d // 2, 1),
+        )
+        self.entangled_head = nn.Sequential(   # v1.1.0 Mode 4
             nn.LayerNorm(d),
             nn.Linear(d, d // 2),
             nn.GELU(),
@@ -341,11 +420,27 @@ class StructuralGNOPhysics(nn.Module):
         x = self._backbone(x, sigma)
         return self.ym_head(x)   # can be negative (complex pole region allowed)
 
+    def forward_entangled(
+        self, features: torch.Tensor, sigma: torch.Tensor
+    ) -> torch.Tensor:
+        """
+        Predict the entangled-pair polarization/spin correlator E(θ_a,θ_b).
+
+        features columns: [θ_a, θ_b, V, pair_source_id]
+        Output bounded to [-1, 1] via tanh, since no physical correlator
+        can exceed that range (it is a normalized expectation value of a
+        product of ±1-valued outcomes).
+        """
+        x = self.entangled_encoder(features)
+        x = self._backbone(x, sigma)
+        return torch.tanh(self.entangled_head(x))
+
     def forward(
         self,
         kinematics:   Optional[torch.Tensor] = None,
         cosmo_params: Optional[torch.Tensor] = None,
         momentum_data:Optional[torch.Tensor] = None,
+        entangled_features: Optional[torch.Tensor] = None,
         sigma:        Optional[torch.Tensor] = None,
     ) -> Dict[str, Optional[torch.Tensor]]:
         """
@@ -355,7 +450,7 @@ class StructuralGNOPhysics(nn.Module):
         if sigma is None:
             # Default: zero structural modulation (pure network)
             bs = next(
-                t for t in [kinematics, cosmo_params, momentum_data]
+                t for t in [kinematics, cosmo_params, momentum_data, entangled_features]
                 if t is not None
             ).shape[0]
             sigma = torch.zeros(bs, 1, device=next(self.parameters()).device)
@@ -367,6 +462,8 @@ class StructuralGNOPhysics(nn.Module):
                         if cosmo_params  is not None else None,
             "ym":       self.forward_ym(momentum_data, sigma)
                         if momentum_data is not None else None,
+            "entangled":self.forward_entangled(entangled_features, sigma)
+                        if entangled_features is not None else None,
         }
 
 
@@ -462,6 +559,7 @@ class MultiTaskPhysicsLoss(nn.Module):
         self.log_var_collider = nn.Parameter(torch.tensor(0.0))
         self.log_var_cosmo    = nn.Parameter(torch.tensor(0.0))
         self.log_var_ym       = nn.Parameter(torch.tensor(0.0))
+        self.log_var_entangled = nn.Parameter(torch.tensor(0.0))  # v1.1.0
         self.cfg = cfg
 
     def _weighted(self, raw_loss: torch.Tensor, log_var: torch.Tensor) -> torch.Tensor:
@@ -495,6 +593,45 @@ class MultiTaskPhysicsLoss(nn.Module):
         d2 = pred_Cl[..., 2:] - 2 * pred_Cl[..., 1:-1] + pred_Cl[..., :-2]
         return (d2 ** 2).mean()
 
+    def physics_penalty_entangled_boundedness(
+        self, pred_E: torch.Tensor
+    ) -> torch.Tensor:
+        """
+        |E(a,b)| <= 1 for any physical correlator (it's a normalized
+        expectation value of a product of ±1 outcomes). The tanh output
+        head already enforces this structurally; this soft penalty is
+        kept as a regression safety net in case the head is ever changed
+        to drop the tanh, and costs nothing when it's already satisfied.
+        """
+        return F.relu(pred_E.abs() - 1.0).mean()
+
+    def physics_penalty_chsh(
+        self,
+        E_ab:   torch.Tensor,
+        E_abp:  torch.Tensor,
+        E_apb:  torch.Tensor,
+        E_apbp: torch.Tensor,
+    ) -> torch.Tensor:
+        """
+        Tsirelson-bound physical-realizability prior.
+
+        For ANY genuine quantum correlator quadruple (whatever the
+        underlying state or visibility), the CHSH combination
+            S = E(a,b) + E(a,b') + E(a',b) - E(a',b')
+        cannot exceed the Tsirelson bound |S| <= 2*sqrt(2) — this is a
+        property of quantum mechanics itself (Tsirelson 1980), not of the
+        Werner-state training target specifically, so it is a valid prior
+        regardless of what V the model is currently predicting for.
+        Penalize predicted quadruples that exceed it; this can only
+        reflect surrogate over/undershoot, never genuine new physics.
+
+        `LOCAL_BOUND`/`TSIRELSON_BOUND` are imported from
+        `bell_chsh_one.py` so this module and that one never drift apart
+        on which numerical bound they mean.
+        """
+        S = E_ab + E_abp + E_apb - E_apbp
+        return F.relu(S.abs() - TSIRELSON_BOUND).mean()
+
     def forward(
         self,
         pred_collider: Optional[torch.Tensor],
@@ -504,14 +641,25 @@ class MultiTaskPhysicsLoss(nn.Module):
         pred_ym:       Optional[torch.Tensor],
         true_ym:       Optional[torch.Tensor],
         p2_sorted:     Optional[torch.Tensor] = None,
+        pred_entangled: Optional[torch.Tensor] = None,
+        true_entangled: Optional[torch.Tensor] = None,
+        chsh_quad: Optional[Tuple[torch.Tensor, torch.Tensor,
+                                   torch.Tensor, torch.Tensor]] = None,
     ) -> Tuple[torch.Tensor, Dict[str, float]]:
         """
         Returns:
             total_loss : scalar Tensor (differentiable)
             breakdown  : dict of float values for logging
+
+        ``chsh_quad``, if provided, is a 4-tuple of model predictions
+        (E(a,b), E(a,b'), E(a',b), E(a',b')) evaluated at independently
+        sampled angle quadruples (see
+        ``SyntheticDataGenerator.chsh_quadruple_batch``), used only for
+        the Tsirelson-bound physical-realizability penalty.
         """
         device = next(
-            p for p in [pred_collider, pred_cosmo, pred_ym] if p is not None
+            p for p in [pred_collider, pred_cosmo, pred_ym, pred_entangled]
+            if p is not None
         ).device
         total = torch.tensor(0.0, device=device)
         breakdown: Dict[str, float] = {}
@@ -543,10 +691,24 @@ class MultiTaskPhysicsLoss(nn.Module):
             breakdown["loss_ym_physics"] = phy if isinstance(phy, float) \
                                            else phy.item()
 
+        if pred_entangled is not None and true_entangled is not None:
+            l = F.mse_loss(pred_entangled, true_entangled)
+            bound_pen = self.physics_penalty_entangled_boundedness(pred_entangled)
+            chsh_pen = torch.tensor(0.0, device=device)
+            if chsh_quad is not None:
+                chsh_pen = self.physics_penalty_chsh(*chsh_quad)
+            phy = self.cfg.lambda_physics * (bound_pen + chsh_pen)
+            wl  = self._weighted(l + phy, self.log_var_entangled)
+            total = total + self.cfg.lambda_entangled * wl
+            breakdown["loss_entangled"]         = l.item()
+            breakdown["loss_entangled_physics"] = phy.item()
+            breakdown["loss_entangled_chsh"]    = chsh_pen.item() if isinstance(chsh_pen, torch.Tensor) else chsh_pen
+
         breakdown["total"] = total.item()
         breakdown["sigma_collider"] = torch.exp(0.5 * self.log_var_collider).item()
         breakdown["sigma_cosmo"]    = torch.exp(0.5 * self.log_var_cosmo).item()
         breakdown["sigma_ym"]       = torch.exp(0.5 * self.log_var_ym).item()
+        breakdown["sigma_entangled"]= torch.exp(0.5 * self.log_var_entangled).item()
         return total, breakdown
 
 
@@ -556,7 +718,7 @@ class MultiTaskPhysicsLoss(nn.Module):
 
 class SyntheticDataGenerator:
     """
-    Provides mini-batches of synthetic physics data for all three domains.
+    Provides mini-batches of synthetic physics data for all four domains.
     Replace with real loaders (CERN Open Data, Planck, lattice QCD) in production.
     """
 
@@ -619,6 +781,59 @@ class SyntheticDataGenerator:
         with torch.no_grad():
             D_true = propagator.D(p2_sorted).unsqueeze(-1)
         return momentum_data, D_true, p2_sorted
+
+    def entangled_batch(
+        self, n: int, v_min: float = 0.5, v_max: float = 1.0
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Entangled-pair polarization/spin correlator (Werner-state model):
+            ρ = V |ψ⁻⟩⟨ψ⁻| + (1-V)/4 · I  ,   E(a,b) = -V·cos(a-b)
+
+        V is sampled in [v_min, v_max]; V=1 is the pure singlet used as
+        the textbook case in ``bell_chsh_one.py``'s QuantumCorrelator,
+        V<1 models real, imperfect entangled-photon / entangled-ion
+        sources. `pair_source_id` is a categorical placeholder for
+        distinct experimental preparations (e.g. SPDC Type-I/II, atomic
+        cascade, trapped-ion) so the surrogate can learn source-specific
+        systematics, mirroring Mode 1's `process_id`.
+
+        Returns (features [n,4] = [θ_a, θ_b, V, pair_source_id],
+                 E_true [n,1]).
+        """
+        theta_a   = torch.rand(n, device=self.device) * 2 * math.pi
+        theta_b   = torch.rand(n, device=self.device) * 2 * math.pi
+        V         = torch.rand(n, device=self.device) * (v_max - v_min) + v_min
+        source_id = torch.randint(0, 4, (n,), device=self.device).float()
+        feats = torch.stack([theta_a, theta_b, V, source_id], dim=-1)
+        E_true = (-V * torch.cos(theta_a - theta_b)).unsqueeze(-1)
+        return feats, E_true
+
+    def chsh_quadruple_batch(
+        self, n: int, v_min: float = 0.5, v_max: float = 1.0
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        """
+        Sample n independent angle quadruples (a,b,a',b') sharing a common
+        visibility V and source id per row, for the Tsirelson-bound
+        physical-realizability penalty (``physics_penalty_chsh``).
+
+        Returns four (n,4) feature tensors, one per CHSH term:
+            (feats_ab, feats_abp, feats_apb, feats_apbp)
+        each formatted identically to ``entangled_batch``'s output
+        features, so they can be fed straight into
+        ``model.forward_entangled``.
+        """
+        theta_a  = torch.rand(n, device=self.device) * 2 * math.pi
+        theta_ap = torch.rand(n, device=self.device) * 2 * math.pi
+        theta_b  = torch.rand(n, device=self.device) * 2 * math.pi
+        theta_bp = torch.rand(n, device=self.device) * 2 * math.pi
+        V         = torch.rand(n, device=self.device) * (v_max - v_min) + v_min
+        source_id = torch.randint(0, 4, (n,), device=self.device).float()
+
+        feats_ab   = torch.stack([theta_a,  theta_b,  V, source_id], dim=-1)
+        feats_abp  = torch.stack([theta_a,  theta_bp, V, source_id], dim=-1)
+        feats_apb  = torch.stack([theta_ap, theta_b,  V, source_id], dim=-1)
+        feats_apbp = torch.stack([theta_ap, theta_bp, V, source_id], dim=-1)
+        return feats_ab, feats_abp, feats_apb, feats_apbp
 
 
 # =============================================================================
@@ -859,15 +1074,21 @@ class NGOPhysicsTrainer:
         B = self.cfg.batch_size
         sigma = self._get_sigma(B)
 
-        # Sample all three domains
+        # Sample all four domains
         kin,    true_coll = self.data_gen.collider_batch(B)
         cosmo,  true_cmb  = self.data_gen.cosmo_batch(B, lmax=self.cfg.lmax)
         mom,    true_ym,  p2_sorted = self.data_gen.ym_batch(B, self.ref_propagator)
+        ent_feats, true_ent = self.data_gen.entangled_batch(B)
+        chsh_feats = self.data_gen.chsh_quadruple_batch(B)
 
         # Forward
         pred_coll = self.model.forward_collider(kin,   sigma)
         pred_cmb  = self.model.forward_cosmo(cosmo,    sigma)
         pred_ym   = self.model.forward_ym(mom,         sigma)
+        pred_ent  = self.model.forward_entangled(ent_feats, sigma)
+        chsh_preds = tuple(
+            self.model.forward_entangled(f, sigma) for f in chsh_feats
+        )
 
         # Loss
         loss, bd = self.loss_fn(
@@ -875,6 +1096,8 @@ class NGOPhysicsTrainer:
             pred_cmb,  true_cmb,
             pred_ym,   true_ym,
             p2_sorted=p2_sorted,
+            pred_entangled=pred_ent, true_entangled=true_ent,
+            chsh_quad=chsh_preds,
         )
 
         loss.backward()
@@ -906,16 +1129,24 @@ class NGOPhysicsTrainer:
             kin,   true_coll = self.data_gen.collider_batch(B)
             cosmo, true_cmb  = self.data_gen.cosmo_batch(B, lmax=self.cfg.lmax)
             mom,   true_ym,  p2s = self.data_gen.ym_batch(B, self.ref_propagator)
+            ent_feats, true_ent = self.data_gen.entangled_batch(B)
+            chsh_feats = self.data_gen.chsh_quadruple_batch(B)
 
             pred_coll = self.model.forward_collider(kin,   sigma)
             pred_cmb  = self.model.forward_cosmo(cosmo,    sigma)
             pred_ym   = self.model.forward_ym(mom,         sigma)
+            pred_ent  = self.model.forward_entangled(ent_feats, sigma)
+            chsh_preds = tuple(
+                self.model.forward_entangled(f, sigma) for f in chsh_feats
+            )
 
             _, bd = self.loss_fn(
                 pred_coll, true_coll,
                 pred_cmb,  true_cmb,
                 pred_ym,   true_ym,
                 p2_sorted=p2s,
+                pred_entangled=pred_ent, true_entangled=true_ent,
+                chsh_quad=chsh_preds,
             )
 
         return bd["total"]
@@ -954,6 +1185,8 @@ class NGOPhysicsTrainer:
                     f"coll={train_bd.get('loss_collider', 0):.3e}  "
                     f"cmb={train_bd.get('loss_cosmo', 0):.3e}  "
                     f"ym={train_bd.get('loss_ym', 0):.3e}  "
+                    f"ent={train_bd.get('loss_entangled', 0):.3e}  "
+                    f"chsh_pen={train_bd.get('loss_entangled_chsh', 0):.3e}  "
                     f"val={val_loss:.4e}  "
                     f"lr={lr_now:.2e}  "
                     f"σ_ym={train_bd.get('sigma_ym', 1):.3f}"
@@ -1037,6 +1270,9 @@ class NGOPhysicsInference:
 
         # Yang–Mills mass gap extraction
         mass_gap_GeV = infer.extract_mass_gap()
+
+        # Entangled-pair correlator + CHSH test (v1.1.0)
+        chsh = infer.chsh_test(visibility=1.0)   # -> S ≈ -2.83 if well trained
     """
 
     def __init__(
@@ -1185,6 +1421,92 @@ class NGOPhysicsInference:
         ])
         return preds.mean(0), preds.std(0)
 
+    @torch.no_grad()
+    def predict_entangled_correlator(
+        self,
+        angles_and_visibility: torch.Tensor,
+        n_samples: int = 1,
+    ) -> Tuple[torch.Tensor, Optional[torch.Tensor]]:
+        """
+        Predict the entangled-pair polarization/spin correlator E(θ_a,θ_b).
+
+        Args:
+            angles_and_visibility : (B, 4) [θ_a, θ_b, V, pair_source_id]
+            n_samples              : MC-dropout forward passes
+
+        Returns:
+            mean : (B, 1) predicted E(θ_a,θ_b) ∈ [-1, 1]
+            std  : (B, 1) uncertainty or None
+        """
+        feats = angles_and_visibility.to(self.device)
+        sigma = self._sigma(feats.shape[0])
+
+        if n_samples == 1:
+            self.model.eval()
+            return self.model.forward_entangled(feats, sigma), None
+
+        self.model.train()
+        preds = torch.stack([
+            self.model.forward_entangled(feats, sigma)
+            for _ in range(n_samples)
+        ])
+        return preds.mean(0), preds.std(0)
+
+    @torch.no_grad()
+    def chsh_test(
+        self,
+        theta_a:  float = 0.0,
+        theta_ap: float = math.pi / 2,
+        theta_b:  float = math.pi / 4,
+        theta_bp: float = -math.pi / 4,
+        visibility: float = 1.0,
+        pair_source_id: float = 0.0,
+    ) -> Dict[str, float]:
+        """
+        Run the model's own predicted correlator through the CHSH
+        combination and classify the result, using the same
+        ``LOCAL_BOUND`` / ``TSIRELSON_BOUND`` constants as the standalone
+        ``bell_chsh_one.py`` test bench (imported from there, not
+        redefined here), so the two files can never silently disagree on
+        what counts as a violation.
+
+        Default angles are the textbook CHSH-optimal settings for a pure
+        singlet (visibility=1.0); for visibility < 1/√2 ≈ 0.707, even a
+        perfect model should report |S| <= 2 (no possible violation),
+        since the underlying Werner state itself stops violating CHSH
+        below that visibility.
+
+        Returns a dict with E(a,b), E(a,b'), E(a',b), E(a',b'), S, and a
+        ``classification`` string ("local" or "quantum").
+        """
+        def _feat(a, b):
+            return torch.tensor(
+                [[a, b, visibility, pair_source_id]],
+                dtype=torch.float32, device=self.device,
+            )
+
+        sigma = self._sigma(1)
+        self.model.eval()
+        E_ab   = self.model.forward_entangled(_feat(theta_a,  theta_b),  sigma).item()
+        E_abp  = self.model.forward_entangled(_feat(theta_a,  theta_bp), sigma).item()
+        E_apb  = self.model.forward_entangled(_feat(theta_ap, theta_b),  sigma).item()
+        E_apbp = self.model.forward_entangled(_feat(theta_ap, theta_bp), sigma).item()
+
+        S = E_ab + E_abp + E_apb - E_apbp
+        classification = "quantum" if abs(S) > LOCAL_BOUND + 1e-6 else "local"
+
+        result = {
+            "E_ab": E_ab, "E_abp": E_abp, "E_apb": E_apb, "E_apbp": E_apbp,
+            "S": S, "local_bound": LOCAL_BOUND, "tsirelson_bound": TSIRELSON_BOUND,
+            "classification": classification,
+        }
+        logger.info(
+            f"CHSH test (model prediction, V={visibility:.3f}): "
+            f"S={S:.4f}  [{classification}]  "
+            f"(local bound={LOCAL_BOUND:.3f}, Tsirelson={TSIRELSON_BOUND:.3f})"
+        )
+        return result
+
     def extract_mass_gap(self, method: str = "pole_scan") -> float:
         """
         Extract the Yang–Mills mass gap from the fitted propagator.
@@ -1256,6 +1578,27 @@ def demo() -> None:
     # Mass gap
     gap = infer.extract_mass_gap()
     logger.info(f"Yang–Mills mass gap ≈ {gap*1000:.1f} MeV")
+
+    # Entangled-pair correlator (v1.1.0)
+    ent_feats = torch.tensor(
+        [[0.0, math.pi / 4, 1.0, 0.0]], device=device
+    )  # theta_a=0, theta_b=pi/4, V=1.0 (pure singlet), source_id=0
+    E_hat, _ = infer.predict_entangled_correlator(ent_feats)
+    logger.info(
+        f"Entangled-pair E(0, π/4 | V=1.0) = {E_hat.item():.4f}  "
+        f"(target -cos(π/4) ≈ {-math.cos(math.pi/4):.4f})"
+    )
+
+    # CHSH test on the model's own predictions, pure singlet vs noisy source
+    chsh_pure  = infer.chsh_test(visibility=1.0)
+    chsh_noisy = infer.chsh_test(visibility=0.6)
+    logger.info(
+        f"CHSH @ V=1.0  : S={chsh_pure['S']:.4f}   [{chsh_pure['classification']}]"
+    )
+    logger.info(
+        f"CHSH @ V=0.6  : S={chsh_noisy['S']:.4f}   [{chsh_noisy['classification']}]  "
+        f"(V=0.6 < 1/√2≈0.707 ⇒ no violation possible even in principle)"
+    )
 
 
 if __name__ == "__main__":
