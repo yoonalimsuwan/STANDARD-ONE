@@ -9,7 +9,6 @@ Unified Differentiable Framework for Particle & Cosmos Physics
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19869633-blue)](https://doi.org/10.5281/zenodo.19869633)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20194882-blue)](https://doi.org/10.5281/zenodo.20194882)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21119636-blue)](https://doi.org/10.5281/zenodo.21119636)
-[![Zenodo]([https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20482078-blue](https://doi.org/10.5281/zenodo.20482078)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20730429-blue)](https://doi.org/10.5281/zenodo.20730429)
 
 
