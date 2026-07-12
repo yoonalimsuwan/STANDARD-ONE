@@ -1,7 +1,7 @@
 # =============================================================================
 # STANDARD ONE — Unified Differentiable Framework for Particle & Cosmos Physics
 # =============================================================================
-# Author : Yoon A Limsuwan
+# Author : PAI , Yoon A Limsuwan
 # License: MIT
 # Year   : 2026
 #
