@@ -211,7 +211,7 @@ If you use STANDARD ONE or YANG MILLS MASS GAP (ONE) in your research, please ci
 
 ```
 @software{standardone2026,
-  author       = {Yoon A Limsuwan},
+  author       = {PAI , Yoon A Limsuwan},
   title        = {STANDARD ONE: Unified Differentiable Framework for Particle \& Cosmos Physics},
   year         = 2026,
   doi          = {https://doi.org/10.5281/zenodo.21119636
@@ -220,7 +220,7 @@ If you use STANDARD ONE or YANG MILLS MASS GAP (ONE) in your research, please ci
 }
 
 @software{yangmillsmassgap2026,
-  author       = {Yoon A Limsuwan},
+  author       = {PAI , Yoon A Limsuwan},
   title        = {YANG MILLS MASS GAP (ONE): Differentiable Explorer for the Yang-Mills Mass Gap},
   year         = 2026,
   doi          =  https://doi.org/10.5281/zenodo.21119636 ,
