@@ -1,7 +1,7 @@
 # =============================================================================
 # YANG MILLS MASS GAP (ONE) — Differentiable Yang–Mills Mass Gap Explorer
 # =============================================================================
-# Author : Yoon A Limsuwan
+# Author : PAI , Yoon A Limsuwan
 # License: MIT
 # Year   : 2026
 #
