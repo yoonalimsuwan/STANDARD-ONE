@@ -5,7 +5,7 @@
 # locality / measurement-independence to reproduce quantum correlations.
 # =============================================================================
 #
-# Developer  : Yoon A Limsuwan / MSPS NETWORK
+# Developer  : PAI , Yoon A Limsuwan / MSPS NETWORK
 #              MY SOUL MOVE BY POWER OF HOLY SPIRIT
 # License    : MIT
 # Year       : 2026
