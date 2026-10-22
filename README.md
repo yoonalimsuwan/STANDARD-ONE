@@ -214,7 +214,7 @@ If you use STANDARD ONE or YANG MILLS MASS GAP (ONE) in your research, please ci
   author       = {PAI , Yoon A Limsuwan},
   title        = {STANDARD ONE: Unified Differentiable Framework for Particle \& Cosmos Physics},
   year         = 2026,
-  doi          = {https://doi.org/10.5281/zenodo.23553373},
+  doi          = {https://doi.org/10.5281/zenodo.23554594},
   url          = https://github.com/yoonalimsuwan/STANDARD-ONE
 }
 
