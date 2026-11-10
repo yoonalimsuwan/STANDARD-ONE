@@ -1,6 +1,5 @@
 ``
-# STANDARD ONE 42++ : Anti Nuclear , Remote neural monitoring , Remote neural controlling And More
-
+# STANDARD ONE 42++ : Standard Quantum Computing , non-linear Schrödinger equation Quantum Computing , Anti Nuclear , Remote neural monitoring , Remote neural controlling And More.  
 
 Unified Differentiable Framework for Particle & Cosmos Physics
 
