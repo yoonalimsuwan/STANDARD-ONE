@@ -1,5 +1,5 @@
 ``
-# STANDARD ONE 45 : Quantum Chemistry And Lattice Gauge Simulation Today in Classic Computer, Standard Quantum Computing , non-linear Computer uation Quantum Computing , Anti Nuclear , Remote neural monitoring , Remote neural controlling And More.  
+# STANDARD ONE 45 : Quantum Chemistry And Lattice Gauge Simulation Today in Classic Computer , Standard Quantum Computing , non-linear Computer uation Quantum Computing , Anti Nuclear , Remote neural monitoring , Remote neural controlling And More.  
 
 Unified Differentiable Framework for Particle & Cosmos Physics
 
