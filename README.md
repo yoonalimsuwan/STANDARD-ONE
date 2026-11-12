@@ -1,5 +1,5 @@
 ``
-# STANDARD ONE 42# : Quantum Chemistry And Lattice Gauge Simulation Today in Classic Computer, Standard Quantum Computing , non-linear Schrödinger equation Quantum Computing , Anti Nuclear , Remote neural monitoring , Remote neural controlling And More.  
+# STANDARD ONE 42# : Quantum Chemistry And Lattice Gauge Simulation Today in Classic Computer, Standard Quantum Computing , non-linear Computer uation Quantum Computing , Anti Nuclear , Remote neural monitoring , Remote neural controlling And More.  
 
 Unified Differentiable Framework for Particle & Cosmos Physics
 
@@ -1854,7 +1854,7 @@ If you use this mathematical framework in your research, please cite:
   version = {1.0.0},
   year = {2026},
   license = {MIT},
-  url = {https://github.com/yoonalimsuwan/strategic-defense-system},
+  url = {https://github.com/yoonalimsuwan},
   orcid = {0009-0008-2374-0788}
 }
 ```
